@@ -1,0 +1,63 @@
+services:
+  # MongoDB 데이터베이스 (관리자용)
+  mongodb-admin:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=hireme-admin
+    volumes:
+      - mongodb_admin_data:/data/db
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - admin-network
+    restart: unless-stopped
+
+  # Python 백엔드 API (관리자용)
+  backend-admin:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb-admin:27017/hireme-admin?authSource=admin
+      - PYTHONPATH=/app
+      - DEBUG=1
+    depends_on:
+      - mongodb-admin
+    networks:
+      - admin-network
+    restart: unless-stopped
+
+  # 관리자 대시보드 (React)
+  frontend-admin:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:8000
+    networks:
+      - admin-network
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend-admin
+
+volumes:
+  mongodb_admin_data:
+
+networks:
+  admin-network:
+    driver: bridge 
