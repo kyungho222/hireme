@@ -14,7 +14,8 @@ import {
   FiMenu,
   FiX,
   FiBell,
-  FiSearch
+  FiSearch,
+  FiBriefcase
 } from 'react-icons/fi';
 
 const LayoutContainer = styled.div`
@@ -174,6 +175,7 @@ const navigationItems = [
   {
     title: '채용 관리',
     items: [
+      { name: '채용공고 등록', path: '/job-posting', icon: FiBriefcase },
       { name: '이력서 관리', path: '/resume', icon: FiFileText },
       { name: '면접 관리', path: '/interview', icon: FiVideo },
       { name: '포트폴리오 분석', path: '/portfolio', icon: FiCode },

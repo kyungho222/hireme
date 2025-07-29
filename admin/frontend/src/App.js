@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout/Layout';
 import Dashboard from './pages/Dashboard/Dashboard';
+import JobPostingRegistration from './pages/JobPostingRegistration/JobPostingRegistration';
 import ResumeManagement from './pages/ResumeManagement/ResumeManagement';
 import InterviewManagement from './pages/InterviewManagement/InterviewManagement';
 import PortfolioAnalysis from './pages/PortfolioAnalysis/PortfolioAnalysis';
@@ -15,6 +16,7 @@ function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/job-posting" element={<JobPostingRegistration />} />
         <Route path="/resume" element={<ResumeManagement />} />
         <Route path="/interview" element={<InterviewManagement />} />
         <Route path="/portfolio" element={<PortfolioAnalysis />} />
