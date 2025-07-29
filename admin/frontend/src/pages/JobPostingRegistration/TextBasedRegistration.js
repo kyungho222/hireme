@@ -17,7 +17,8 @@ import {
   FiClock,
   FiFileText,
   FiSave,
-  FiFolder
+  FiFolder,
+  FiRefreshCw
 } from 'react-icons/fi';
 
 const Overlay = styled(motion.div)`
@@ -334,46 +335,44 @@ const AISuggestionText = styled.div`
 const TextBasedRegistration = ({ 
   isOpen, 
   onClose, 
-  onComplete 
+  onComplete,
+  organizationData = { departments: [] }
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templates, setTemplates] = useState([]);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [formData, setFormData] = useState({
-    // Step 1: 조직도
-    organization: '',
-    
-    // Step 2: 구인 부서
+    // Step 1: 구인 부서
     department: '',
     experience: '',
     experienceYears: '',
     
-    // Step 3: 구인 정보
+    // Step 2: 구인 정보
     headcount: '',
     mainDuties: '',
     
-    // Step 4: 근무 조건
+    // Step 3: 근무 조건
     workHours: '',
     workDays: '',
     locationCity: '',
     locationDistrict: '',
     salary: '',
     
-    // Step 5: 전형 절차
+    // Step 4: 전형 절차
     process: ['서류', '실무면접', '최종면접', '입사'],
     
-    // Step 6: 지원 방법
+    // Step 5: 지원 방법
     contactEmail: '',
     deadline: ''
   });
 
   const steps = [
-    { number: 1, label: '조직도', icon: FiUsers },
-    { number: 2, label: '구인 부서', icon: FiBriefcase },
-    { number: 3, label: '구인 정보', icon: FiFileText },
-    { number: 4, label: '근무 조건', icon: FiClock },
-    { number: 5, label: '전형 절차', icon: FiAward },
-    { number: 6, label: '지원 방법', icon: FiMail }
+    { number: 1, label: '구인 부서', icon: FiBriefcase },
+    { number: 2, label: '구인 정보', icon: FiFileText },
+    { number: 3, label: '근무 조건', icon: FiClock },
+    { number: 4, label: '전형 절차', icon: FiAward },
+    { number: 5, label: '지원 방법', icon: FiMail }
   ];
 
   const progress = (currentStep / steps.length) * 100;
@@ -398,10 +397,73 @@ const TextBasedRegistration = ({
     }
   };
 
-  const handleComplete = () => {
+  const sendNotificationEmail = async (jobData) => {
+    setIsSendingEmail(true);
+    
+    try {
+      // 이메일 전송 시뮬레이션 (실제로는 API 호출)
+      console.log('📧 이메일 전송 중...');
+      console.log('받는 사람:', jobData.contactEmail);
+      console.log('제목: 채용공고 등록 완료 알림');
+      
+      // 실제 구현 시 사용할 이메일 템플릿
+      const emailTemplate = {
+        to: jobData.contactEmail,
+        subject: '[채용공고 등록 완료] 새로운 채용공고가 등록되었습니다',
+        body: `
+          안녕하세요, 인사담당자님!
+          
+          새로운 채용공고가 성공적으로 등록되었습니다.
+          
+          📋 채용공고 정보
+          - 공고 제목: ${jobData.title || 'AI 생성 제목'}
+          - 구인 부서: ${jobData.department}
+          - 경력 구분: ${jobData.experience}
+          - 구인 인원: ${jobData.headcount}
+          - 근무지: ${jobData.locationCity} ${jobData.locationDistrict}
+          - 연봉: ${jobData.salary}
+          - 마감일: ${jobData.deadline}
+          
+          🎯 주요 업무
+          ${jobData.mainDuties}
+          
+          📞 지원 문의
+          - 이메일: ${jobData.contactEmail}
+          - 전형 절차: ${jobData.process?.join(' → ') || '서류 → 실무면접 → 최종면접 → 입사'}
+          
+          채용공고 관리 시스템에서 언제든지 수정하거나 관리할 수 있습니다.
+          
+          감사합니다.
+          채용관리팀
+        `
+      };
+      
+      // 시뮬레이션: 2초 후 완료
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log('✅ 이메일 전송 완료');
+      alert(`📧 인사담당자(${jobData.contactEmail})에게 등록 완료 알림 이메일이 전송되었습니다.`);
+      
+    } catch (error) {
+      console.error('❌ 이메일 전송 실패:', error);
+      alert('이메일 전송 중 오류가 발생했습니다. 채용공고는 정상적으로 등록되었습니다.');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  const handleComplete = async () => {
     // AI 추천 문구 생성 로직
     const aiGeneratedContent = generateAIContent(formData);
-    onComplete({ ...formData, ...aiGeneratedContent });
+    const completeData = { ...formData, ...aiGeneratedContent };
+    
+    // 채용공고 등록 완료 처리
+    onComplete(completeData);
+    
+    // 인사담당자에게 알림 이메일 전송
+    if (formData.contactEmail) {
+      await sendNotificationEmail(completeData);
+    }
   };
 
   const handleSaveTemplate = (template) => {
@@ -429,34 +491,6 @@ const TextBasedRegistration = ({
   const renderStep1 = () => (
     <FormSection>
       <SectionTitle>
-        <FiUsers size={18} />
-        회사 조직도 입력
-      </SectionTitle>
-      <FormGroup>
-        <Label>현재 조직도</Label>
-        <TextArea
-          name="organization"
-          value={formData.organization}
-          onChange={handleInputChange}
-          placeholder="예시: 대표 - 부장 - 영업(3), 마케팅(2), 기획(3), 디자인(8), 개발(3)"
-          required
-        />
-      </FormGroup>
-      <AISuggestion>
-        <AISuggestionTitle>
-          <FiCheck size={16} />
-          AI 추천
-        </AISuggestionTitle>
-        <AISuggestionText>
-          조직도를 입력하면 AI가 적합한 구인 부서를 추천해드립니다.
-        </AISuggestionText>
-      </AISuggestion>
-    </FormSection>
-  );
-
-  const renderStep2 = () => (
-    <FormSection>
-      <SectionTitle>
         <FiBriefcase size={18} />
         구인 부서 및 경력 선택
       </SectionTitle>
@@ -465,12 +499,35 @@ const TextBasedRegistration = ({
           <Label>구인 부서</Label>
           <Select name="department" value={formData.department} onChange={handleInputChange} required>
             <option value="">부서 선택</option>
-            <option value="영업">영업</option>
-            <option value="마케팅">마케팅</option>
-            <option value="기획">기획</option>
-            <option value="디자인">디자인</option>
-            <option value="개발">개발</option>
+            {organizationData.departments && organizationData.departments.length > 0 ? (
+              organizationData.departments.map((dept, index) => (
+                <option key={index} value={dept.name}>
+                  {dept.name} ({dept.count}명)
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="영업">영업</option>
+                <option value="마케팅">마케팅</option>
+                <option value="기획">기획</option>
+                <option value="디자인">디자인</option>
+                <option value="개발">개발</option>
+              </>
+            )}
           </Select>
+          {organizationData.departments && organizationData.departments.length > 0 && (
+            <div style={{ 
+              marginTop: '8px', 
+              fontSize: '12px', 
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <FiUsers size={12} />
+              조직도에서 설정된 {organizationData.departments.length}개 부서 중 선택
+            </div>
+          )}
         </FormGroup>
         <FormGroup>
           <Label>경력 구분</Label>
@@ -526,7 +583,7 @@ const TextBasedRegistration = ({
                     ...prev, 
                     experienceYears: e.target.value 
                   }))}
-                  placeholder="예: 3년 6개월"
+                  placeholder="예: 3년 이상"
                   style={{ marginTop: '8px' }}
                 />
               )}
@@ -535,9 +592,9 @@ const TextBasedRegistration = ({
         </FormGroup>
       </FormGrid>
     </FormSection>
-  );
+    );
 
-  const renderStep3 = () => (
+  const renderStep2 = () => (
     <FormSection>
       <SectionTitle>
         <FiFileText size={18} />
@@ -569,7 +626,7 @@ const TextBasedRegistration = ({
     </FormSection>
   );
 
-  const renderStep4 = () => (
+  const renderStep3 = () => (
     <FormSection>
       <SectionTitle>
         <FiClock size={18} />
@@ -801,7 +858,7 @@ const TextBasedRegistration = ({
     </FormSection>
   );
 
-  const renderStep5 = () => (
+  const renderStep4 = () => (
     <FormSection>
       <SectionTitle>
         <FiAward size={18} />
@@ -819,7 +876,7 @@ const TextBasedRegistration = ({
     </FormSection>
   );
 
-  const renderStep6 = () => (
+  const renderStep5 = () => (
     <FormSection>
       <SectionTitle>
         <FiMail size={18} />
@@ -858,7 +915,6 @@ const TextBasedRegistration = ({
       case 3: return renderStep3();
       case 4: return renderStep4();
       case 5: return renderStep5();
-      case 6: return renderStep6();
       default: return null;
     }
   };
@@ -931,9 +987,23 @@ const TextBasedRegistration = ({
                 <Button 
                   className="primary" 
                   onClick={currentStep === steps.length ? handleComplete : handleNext}
+                  disabled={currentStep === steps.length && isSendingEmail}
                 >
-                  {currentStep === steps.length ? '완료' : '다음'}
-                  {currentStep !== steps.length && <FiArrowRight size={16} />}
+                  {currentStep === steps.length ? (
+                    isSendingEmail ? (
+                      <>
+                        <FiRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        이메일 전송 중...
+                      </>
+                    ) : (
+                      '완료'
+                    )
+                  ) : (
+                    <>
+                      다음
+                      <FiArrowRight size={16} />
+                    </>
+                  )}
                 </Button>
               </ButtonGroup>
             </Content>

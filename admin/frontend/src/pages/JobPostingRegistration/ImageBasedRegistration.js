@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import TemplateModal from './TemplateModal';
 import { 
   FiX, 
   FiArrowLeft, 
@@ -9,7 +10,14 @@ import {
   FiImage,
   FiDownload,
   FiEye,
-  FiRefreshCw
+  FiRefreshCw,
+  FiUsers,
+  FiBriefcase,
+  FiFileText,
+  FiClock,
+  FiAward,
+  FiMail,
+  FiFolder
 } from 'react-icons/fi';
 
 const Overlay = styled(motion.div)`
@@ -197,6 +205,72 @@ const Select = styled.select`
   }
 `;
 
+const RadioGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const RadioOption = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &.selected {
+    border-color: var(--primary-color);
+    background: rgba(0, 123, 255, 0.05);
+  }
+
+  &:hover {
+    border-color: var(--primary-color);
+  }
+`;
+
+const RadioInput = styled.input`
+  margin-right: 12px;
+`;
+
+const RadioText = styled.div`
+  flex: 1;
+`;
+
+const RadioTitle = styled.div`
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+`;
+
+const RadioDescription = styled.div`
+  font-size: 12px;
+  color: var(--text-secondary);
+`;
+
+const AISuggestion = styled.div`
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+`;
+
+const AISuggestionTitle = styled.div`
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const AISuggestionText = styled.p`
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+`;
+
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
@@ -208,41 +282,66 @@ const ButtonGroup = styled.div`
 
 const Button = styled.button`
   padding: 12px 24px;
+  border: none;
   border-radius: 8px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  border: none;
   display: flex;
   align-items: center;
   gap: 8px;
 
   &.primary {
-    background: linear-gradient(135deg, #f093fb, #f5576c);
+    background: var(--primary-color);
     color: white;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+      background: var(--primary-hover);
+    }
+
+    &:disabled {
+      background: var(--border-color);
+      cursor: not-allowed;
     }
   }
 
   &.secondary {
-    background: white;
-    color: var(--text-secondary);
+    background: transparent;
+    color: var(--text-primary);
     border: 2px solid var(--border-color);
 
     &:hover {
-      background: var(--background-secondary);
-      border-color: var(--text-secondary);
+      border-color: var(--primary-color);
+      color: var(--primary-color);
     }
+  }
+`;
+
+const GenerateButton = styled.button`
+  padding: 16px 32px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    box-shadow: none;
   }
 `;
 
@@ -329,57 +428,55 @@ const LoadingSubtext = styled.div`
   color: var(--text-light);
 `;
 
-const AISuggestion = styled.div`
-  background: rgba(240, 147, 251, 0.1);
-  border: 1px solid rgba(240, 147, 251, 0.2);
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
-`;
 
-const AISuggestionTitle = styled.div`
-  font-weight: 600;
-  color: #f093fb;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`;
-
-const AISuggestionText = styled.div`
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-`;
 
 const ImageBasedRegistration = ({ 
   isOpen, 
   onClose, 
-  onComplete 
+  onComplete,
+  organizationData = { departments: [] }
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [templates, setTemplates] = useState([]);
   const [formData, setFormData] = useState({
-    title: '',
+    // Step 1: 구인 부서
     department: '',
     experience: '',
+    experienceYears: '',
+    
+    // Step 2: 구인 정보
+    headcount: '',
     mainDuties: '',
-    requirements: '',
-    benefits: '',
+    
+    // Step 3: 근무 조건
     workHours: '',
-    location: '',
+    workDays: '',
+    locationCity: '',
+    locationDistrict: '',
     salary: '',
-    deadline: '',
-    contactEmail: ''
+    
+    // Step 4: 전형 절차
+    process: ['서류', '실무면접', '최종면접', '입사'],
+    
+    // Step 5: 지원 방법
+    contactEmail: '',
+    deadline: ''
   });
 
   const [generatedImages, setGeneratedImages] = useState([]);
 
   const steps = [
-    { number: 1, label: '정보 입력', icon: FiImage },
-    { number: 2, label: '이미지 생성', icon: FiImage },
-    { number: 3, label: '이미지 선택', icon: FiImage }
+    { number: 1, label: '구인 부서', icon: FiBriefcase },
+    { number: 2, label: '구인 정보', icon: FiFileText },
+    { number: 3, label: '근무 조건', icon: FiClock },
+    { number: 4, label: '전형 절차', icon: FiAward },
+    { number: 5, label: '지원 방법', icon: FiMail },
+    { number: 6, label: '이미지 생성', icon: FiImage },
+    { number: 7, label: '이미지 선택', icon: FiImage }
   ];
 
   const handleInputChange = (e) => {
@@ -425,47 +522,246 @@ const ImageBasedRegistration = ({
     setSelectedImage(image);
   };
 
-  const handleComplete = () => {
-    if (selectedImage && onComplete) {
-      onComplete({ ...formData, selectedImage });
+  const sendNotificationEmail = async (jobData) => {
+    setIsSendingEmail(true);
+    
+    try {
+      // 이메일 전송 시뮬레이션 (실제로는 API 호출)
+      console.log('📧 이메일 전송 중...');
+      console.log('받는 사람:', jobData.contactEmail);
+      console.log('제목: 채용공고 등록 완료 알림');
+      
+      // 실제 구현 시 사용할 이메일 템플릿
+      const emailTemplate = {
+        to: jobData.contactEmail,
+        subject: '[채용공고 등록 완료] 새로운 채용공고가 등록되었습니다',
+        body: `
+          안녕하세요, 인사담당자님!
+          
+          새로운 채용공고가 성공적으로 등록되었습니다.
+          
+          📋 채용공고 정보
+          - 공고 제목: ${jobData.title || 'AI 생성 제목'}
+          - 구인 부서: ${jobData.department}
+          - 경력 구분: ${jobData.experience}
+          - 근무지: ${jobData.location}
+          - 연봉: ${jobData.salary}
+          - 마감일: ${jobData.deadline}
+          
+          🎯 주요 업무
+          ${jobData.mainDuties}
+          
+          📞 지원 문의
+          - 이메일: ${jobData.contactEmail}
+          
+          🖼️ AI 생성 이미지
+          선택된 이미지가 채용공고에 적용되었습니다.
+          
+          채용공고 관리 시스템에서 언제든지 수정하거나 관리할 수 있습니다.
+          
+          감사합니다.
+          채용관리팀
+        `
+      };
+      
+      // 시뮬레이션: 2초 후 완료
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      console.log('✅ 이메일 전송 완료');
+      alert(`📧 인사담당자(${jobData.contactEmail})에게 등록 완료 알림 이메일이 전송되었습니다.`);
+      
+    } catch (error) {
+      console.error('❌ 이메일 전송 실패:', error);
+      alert('이메일 전송 중 오류가 발생했습니다. 채용공고는 정상적으로 등록되었습니다.');
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
+  const handleSaveTemplate = (template) => {
+    setTemplates(prev => [...prev, template]);
+  };
+
+  const handleLoadTemplate = (templateData) => {
+    setFormData(prev => ({ ...prev, ...templateData }));
+  };
+
+  const handleDeleteTemplate = (templateId) => {
+    setTemplates(prev => prev.filter(template => template.id !== templateId));
+  };
+
+  const handleComplete = async () => {
+    if (selectedImage && onComplete) {
+      const completeData = { ...formData, selectedImage };
+      
+      // 채용공고 등록 완료 처리
+      onComplete(completeData);
+      
+      // 인사담당자에게 알림 이메일 전송
+      if (formData.contactEmail) {
+        await sendNotificationEmail(completeData);
+      }
+    }
+  };
+
+  // 단계별 렌더 함수들 (1~5단계)
   const renderStep1 = () => (
     <FormSection>
       <SectionTitle>
-        <FiImage size={18} />
-        채용공고 정보 입력
+        <FiBriefcase size={18} />
+        구인 부서 및 경력 선택
       </SectionTitle>
       <FormGrid>
         <FormGroup>
-          <Label>공고 제목 *</Label>
-          <Input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleInputChange}
-            placeholder="예: 프론트엔드 개발자 채용"
-            required
-          />
-        </FormGroup>
-        <FormGroup>
-          <Label>부서</Label>
-          <Select name="department" value={formData.department} onChange={handleInputChange}>
+          <Label>구인 부서</Label>
+          <Select name="department" value={formData.department} onChange={handleInputChange} required>
             <option value="">부서 선택</option>
-            <option value="개발">개발</option>
-            <option value="디자인">디자인</option>
-            <option value="마케팅">마케팅</option>
-            <option value="영업">영업</option>
+            {organizationData.departments && organizationData.departments.length > 0 ? (
+              organizationData.departments.map((dept, index) => (
+                <option key={index} value={dept.name}>
+                  {dept.name} ({dept.count}명)
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="영업">영업</option>
+                <option value="마케팅">마케팅</option>
+                <option value="기획">기획</option>
+                <option value="디자인">디자인</option>
+                <option value="개발">개발</option>
+              </>
+            )}
           </Select>
+          {organizationData.departments && organizationData.departments.length > 0 && (
+            <div style={{ marginTop: '8px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <FiUsers size={12} />
+              조직도에서 설정된 {organizationData.departments.length}개 부서 중 선택
+            </div>
+          )}
         </FormGroup>
         <FormGroup>
           <Label>경력 구분</Label>
-          <Select name="experience" value={formData.experience} onChange={handleInputChange}>
-            <option value="">경력 선택</option>
-            <option value="신입">신입</option>
-            <option value="경력">경력</option>
+          <RadioGroup>
+            <RadioOption className={formData.experience === '신입' ? 'selected' : ''}>
+              <RadioInput
+                type="radio"
+                name="experience"
+                value="신입"
+                checked={formData.experience === '신입'}
+                onChange={handleInputChange}
+              />
+              <RadioText>
+                <RadioTitle>신입</RadioTitle>
+                <RadioDescription>경력 없이 신입 채용</RadioDescription>
+              </RadioText>
+            </RadioOption>
+            <RadioOption className={formData.experience === '경력' ? 'selected' : ''}>
+              <RadioInput
+                type="radio"
+                name="experience"
+                value="경력"
+                checked={formData.experience === '경력'}
+                onChange={handleInputChange}
+              />
+              <RadioText>
+                <RadioTitle>경력</RadioTitle>
+                <RadioDescription>관련 경력자 채용</RadioDescription>
+              </RadioText>
+            </RadioOption>
+          </RadioGroup>
+          {formData.experience === '경력' && (
+            <div style={{ marginTop: '12px' }}>
+              <Label>경력 연도</Label>
+              <Select 
+                name="experienceYears" 
+                value={formData.experienceYears || ''} 
+                onChange={handleInputChange}
+                style={{ marginTop: '8px' }}
+              >
+                <option value="">경력 연도 선택</option>
+                <option value="2년이상">2년이상</option>
+                <option value="2~3년">2~3년</option>
+                <option value="4~5년">4~5년</option>
+                <option value="직접입력">직접입력</option>
+              </Select>
+              {formData.experienceYears === '직접입력' && (
+                <Input
+                  type="text"
+                  name="experienceYearsCustom"
+                  value={formData.experienceYearsCustom || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, experienceYears: e.target.value }))}
+                  placeholder="예: 3년 이상"
+                  style={{ marginTop: '8px' }}
+                />
+              )}
+            </div>
+          )}
+        </FormGroup>
+      </FormGrid>
+
+    </FormSection>
+  );
+
+  const renderStep2 = () => (
+    <FormSection>
+      <SectionTitle>
+        <FiFileText size={18} />
+        구인 정보
+      </SectionTitle>
+      <FormGrid>
+        <FormGroup>
+          <Label>구인 인원수</Label>
+          <Select name="headcount" value={formData.headcount} onChange={handleInputChange} required>
+            <option value="">인원 선택</option>
+            <option value="1명">1명</option>
+            <option value="2명">2명</option>
+            <option value="3명">3명</option>
+            <option value="4명">4명</option>
+            <option value="5명 이상">5명 이상</option>
           </Select>
+        </FormGroup>
+        <FormGroup>
+          <Label>주요 업무</Label>
+          <TextArea
+            name="mainDuties"
+            value={formData.mainDuties}
+            onChange={handleInputChange}
+            placeholder="담당할 주요 업무를 입력해주세요"
+            required
+          />
+        </FormGroup>
+      </FormGrid>
+    </FormSection>
+  );
+
+  const renderStep3 = () => (
+    <FormSection>
+      <SectionTitle>
+        <FiClock size={18} />
+        근무 조건
+      </SectionTitle>
+      <FormGrid>
+        <FormGroup>
+          <Label>근무 시간</Label>
+          <Select name="workHours" value={formData.workHours} onChange={handleInputChange} required>
+            <option value="">근무시간 선택</option>
+            <option value="09:00 ~ 18:00">09:00 ~ 18:00</option>
+            <option value="10:00 ~ 19:00">10:00 ~ 19:00</option>
+            <option value="직접 입력">직접 입력</option>
+          </Select>
+          {formData.workHours === '직접 입력' && (
+            <Input
+              type="text"
+              name="workHoursCustom"
+              value={formData.workHoursCustom || ''}
+              onChange={(e) => setFormData(prev => ({ 
+                ...prev, 
+                workHours: e.target.value 
+              }))}
+              placeholder="예: 09:00 ~ 18:00"
+              style={{ marginTop: '8px' }}
+            />
+          )}
         </FormGroup>
         <FormGroup>
           <Label>근무지</Label>
@@ -655,61 +951,56 @@ const ImageBasedRegistration = ({
             name="salary"
             value={formData.salary}
             onChange={handleInputChange}
-            placeholder="예: 3,000만원 ~ 5,000만원"
+            placeholder="예: 4,000만원 ~ 6,000만원"
           />
         </FormGroup>
-        <FormGroup>
-          <Label>근무 시간</Label>
-          <Select name="workHours" value={formData.workHours} onChange={handleInputChange}>
-            <option value="">근무시간 선택</option>
-            <option value="09:00 ~ 18:00">09:00 ~ 18:00</option>
-            <option value="10:00 ~ 19:00">10:00 ~ 19:00</option>
-            <option value="직접 입력">직접 입력</option>
-          </Select>
-          {formData.workHours === '직접 입력' && (
-            <Input
-              type="text"
-              name="workHoursCustom"
-              value={formData.workHoursCustom || ''}
-              onChange={(e) => setFormData(prev => ({ ...prev, workHours: e.target.value }))}
-              placeholder="예: 08:30 ~ 17:30"
-              style={{ marginTop: '8px' }}
-            />
-          )}
-        </FormGroup>
       </FormGrid>
-      
-      <FormGroup>
-        <Label>주요 업무</Label>
-        <TextArea
-          name="mainDuties"
-          value={formData.mainDuties}
-          onChange={handleInputChange}
-          placeholder="담당할 주요 업무를 입력해주세요"
-        />
-      </FormGroup>
+    </FormSection>
+  );
 
+  const renderStep4 = () => (
+    <FormSection>
+      <SectionTitle>
+        <FiAward size={18} />
+        전형 절차
+      </SectionTitle>
       <FormGroup>
-        <Label>자격 요건</Label>
-        <TextArea
-          name="requirements"
-          value={formData.requirements}
-          onChange={handleInputChange}
-          placeholder="필요한 자격 요건을 입력해주세요"
-        />
+        <Label>전형 절차</Label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {formData.process.map((step, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                {index + 1}.
+              </span>
+              <span>{step}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ marginTop: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+          기본 전형 절차가 설정되어 있습니다. 필요시 수정 가능합니다.
+        </div>
       </FormGroup>
+    </FormSection>
+  );
 
-      <FormGroup>
-        <Label>복리후생</Label>
-        <TextArea
-          name="benefits"
-          value={formData.benefits}
-          onChange={handleInputChange}
-          placeholder="제공되는 복리후생을 입력해주세요"
-        />
-      </FormGroup>
-
+  const renderStep5 = () => (
+    <FormSection>
+      <SectionTitle>
+        <FiMail size={18} />
+        지원 방법
+      </SectionTitle>
       <FormGrid>
+        <FormGroup>
+          <Label>인사담당자 이메일</Label>
+          <Input
+            type="email"
+            name="contactEmail"
+            value={formData.contactEmail}
+            onChange={handleInputChange}
+            placeholder="인사담당자 이메일"
+            required
+          />
+        </FormGroup>
         <FormGroup>
           <Label>마감일</Label>
           <Input
@@ -717,41 +1008,39 @@ const ImageBasedRegistration = ({
             name="deadline"
             value={formData.deadline}
             onChange={handleInputChange}
-          />
-        </FormGroup>
-        <FormGroup>
-          <Label>연락처 이메일</Label>
-          <Input
-            type="email"
-            name="contactEmail"
-            value={formData.contactEmail}
-            onChange={handleInputChange}
-            placeholder="인사담당자 이메일"
+            required
           />
         </FormGroup>
       </FormGrid>
-
-      <AISuggestion>
-        <AISuggestionTitle>
-          <FiCheck size={16} />
-          AI 이미지 생성
-        </AISuggestionTitle>
-        <AISuggestionText>
-          입력하신 정보를 바탕으로 AI가 다양한 스타일의 채용공고 이미지를 생성합니다.
-        </AISuggestionText>
-      </AISuggestion>
     </FormSection>
   );
 
-  const renderStep2 = () => (
-    <LoadingSection>
-      <LoadingSpinner />
-      <LoadingText>AI가 이미지를 생성하고 있습니다...</LoadingText>
-      <LoadingSubtext>잠시만 기다려주세요 (약 3초 소요)</LoadingSubtext>
-    </LoadingSection>
+  const renderStep6 = () => (
+    <FormSection>
+      <SectionTitle>
+        <FiImage size={18} />
+        이미지 생성
+      </SectionTitle>
+      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+        {isGenerating ? (
+          <div>
+            <LoadingSpinner />
+            <LoadingText>AI가 이미지를 생성하고 있습니다...</LoadingText>
+            <LoadingSubtext>잠시만 기다려주세요</LoadingSubtext>
+          </div>
+        ) : (
+          <div>
+            <GenerateButton onClick={handleGenerateImages}>
+              <FiRefreshCw size={24} />
+              이미지 생성 시작
+            </GenerateButton>
+          </div>
+        )}
+      </div>
+    </FormSection>
   );
 
-  const renderStep3 = () => (
+  const renderStep7 = () => (
     <FormSection>
       <SectionTitle>
         <FiImage size={18} />
@@ -784,6 +1073,10 @@ const ImageBasedRegistration = ({
       case 1: return renderStep1();
       case 2: return renderStep2();
       case 3: return renderStep3();
+      case 4: return renderStep4();
+      case 5: return renderStep5();
+      case 6: return renderStep6();
+      case 7: return renderStep7();
       default: return null;
     }
   };
@@ -840,20 +1133,54 @@ const ImageBasedRegistration = ({
                   <FiArrowLeft size={16} />
                   {currentStep === 1 ? '취소' : '이전'}
                 </Button>
+                {currentStep === 1 && (
+                  <Button 
+                    className="secondary" 
+                    onClick={() => setShowTemplateModal(true)}
+                  >
+                    <FiFolder size={16} />
+                    템플릿
+                  </Button>
+                )}
                 <Button 
                   className="primary" 
-                  onClick={currentStep === 1 ? handleGenerateImages : handleComplete}
-                  disabled={currentStep === 3 && !selectedImage}
+                  onClick={currentStep === steps.length ? handleComplete : () => setCurrentStep(currentStep + 1)}
+                  disabled={(currentStep === steps.length && !selectedImage) || (currentStep === steps.length && isSendingEmail)}
                 >
-                  {currentStep === 1 ? '이미지 생성' : '완료'}
-                  {currentStep === 1 && <FiRefreshCw size={16} />}
-                  {currentStep === 3 && <FiCheck size={16} />}
+                  {currentStep === steps.length ? (
+                    isSendingEmail ? (
+                      <>
+                        <FiRefreshCw size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                        이메일 전송 중...
+                      </>
+                    ) : (
+                      <>
+                        완료
+                        <FiCheck size={16} />
+                      </>
+                    )
+                  ) : (
+                    <>
+                      다음
+                      <FiArrowRight size={16} />
+                    </>
+                  )}
                 </Button>
               </ButtonGroup>
             </Content>
           </Modal>
         </Overlay>
       )}
+
+      <TemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSaveTemplate={handleSaveTemplate}
+        onLoadTemplate={handleLoadTemplate}
+        onDeleteTemplate={handleDeleteTemplate}
+        templates={templates}
+        currentData={formData}
+      />
     </AnimatePresence>
   );
 };

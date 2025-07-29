@@ -20,6 +20,7 @@ import RegistrationMethodModal from './RegistrationMethodModal';
 import TextBasedRegistration from './TextBasedRegistration';
 import ImageBasedRegistration from './ImageBasedRegistration';
 import TemplateModal from './TemplateModal';
+import OrganizationModal from './OrganizationModal';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -316,7 +317,13 @@ const JobPostingRegistration = () => {
   const [showTextRegistration, setShowTextRegistration] = useState(false);
   const [showImageRegistration, setShowImageRegistration] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showOrganizationModal, setShowOrganizationModal] = useState(false);
   const [templates, setTemplates] = useState([]);
+  const [organizationData, setOrganizationData] = useState({
+    structure: '',
+    departments: [],
+    organizationImage: null
+  });
   const [formData, setFormData] = useState({
     title: '',
     company: '',
@@ -512,6 +519,10 @@ const JobPostingRegistration = () => {
     setTemplates(prev => prev.filter(template => template.id !== templateId));
   };
 
+  const handleSaveOrganization = (data) => {
+    setOrganizationData(data);
+  };
+
   const getStatusText = (status) => {
     switch (status) {
       case 'active': return '모집중';
@@ -533,6 +544,15 @@ const JobPostingRegistration = () => {
           >
             <FiPlus size={20} />
             새 공고 등록
+          </AddButton>
+          <AddButton
+            onClick={() => setShowOrganizationModal(true)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            style={{ background: 'linear-gradient(135deg, #ff6b6b, #ee5a24)' }}
+          >
+            <FiUsers size={20} />
+            조직도 설정
           </AddButton>
           <AddButton
             onClick={() => setShowTemplateModal(true)}
@@ -806,16 +826,25 @@ const JobPostingRegistration = () => {
         onSelectMethod={handleMethodSelect}
       />
 
-      <TextBasedRegistration
-        isOpen={showTextRegistration}
-        onClose={() => setShowTextRegistration(false)}
-        onComplete={handleTextRegistrationComplete}
-      />
+              <TextBasedRegistration
+          isOpen={showTextRegistration}
+          onClose={() => setShowTextRegistration(false)}
+          onComplete={handleTextRegistrationComplete}
+          organizationData={organizationData}
+        />
 
-      <ImageBasedRegistration
-        isOpen={showImageRegistration}
-        onClose={() => setShowImageRegistration(false)}
-        onComplete={handleImageRegistrationComplete}
+              <ImageBasedRegistration
+          isOpen={showImageRegistration}
+          onClose={() => setShowImageRegistration(false)}
+          onComplete={handleImageRegistrationComplete}
+          organizationData={organizationData}
+        />
+
+      <OrganizationModal
+        isOpen={showOrganizationModal}
+        onClose={() => setShowOrganizationModal(false)}
+        organizationData={organizationData}
+        onSave={handleSaveOrganization}
       />
 
       <TemplateModal
