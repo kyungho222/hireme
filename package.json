@@ -8,9 +8,11 @@
     "client"
   ],
   "scripts": {
+    "server": "node server.js",
+    "dev": "concurrently \"npm run server\" \"npm run start:admin\" \"npm run start:client\"",
     "start": "concurrently \"npm run start:admin\" \"npm run start:client\"",
     "start:admin": "cd admin && npm start",
-    "start:client": "cd client && npm start",
+    "start:client": "cd client && set PORT=3002 && npm start",
     "build": "npm run build:admin && npm run build:client",
     "build:admin": "cd admin && npm run build",
     "build:client": "cd client && npm run build",
@@ -26,5 +28,11 @@
   "engines": {
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "mongoose": "^8.16.5"
   }
-} 
+}

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { 
   FiUsers, 
   FiStar, 
@@ -299,9 +300,67 @@ const talents = [
   }
 ];
 
+const ChatInput = styled.div`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 300px;
+  background: white;
+  padding: 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-medium);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+const ChatTextarea = styled.textarea`
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  resize: none;
+  min-height: 80px;
+`;
+
 const TalentRecommendation = () => {
   const [selectedTalent, setSelectedTalent] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [talents, setTalents] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetchTalents();
+  }, []);
+
+  const fetchTalents = async () => {
+    try {
+      const response = await axios.get('/api/talents');
+      setTalents(response.data);
+    } catch (error) {
+      console.error('Failed to fetch talents:', error);
+    }
+  };
+
+  const handleChatSubmit = async () => {
+    if (!chatInput.trim()) return;
+    
+    setLoading(true);
+    try {
+      const response = await axios.post('/api/talents/search', {
+        query: chatInput
+      });
+      
+      setTalents(response.data);
+      setChatInput('');
+    } catch (error) {
+      console.error('Failed to analyze query:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <TalentContainer>
@@ -323,6 +382,8 @@ const TalentRecommendation = () => {
         <SearchInput
           type="text"
           placeholder="직무, 기술 스택, 경력으로 검색..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <FilterButton>
           <FiFilter />
@@ -331,7 +392,13 @@ const TalentRecommendation = () => {
       </SearchBar>
 
       <TalentGrid>
-        {talents.map((talent, index) => (
+        {talents.filter(talent => 
+          searchQuery ? (
+            talent.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            talent.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            talent.skills.some(skill => skill.toLowerCase().includes(searchQuery.toLowerCase()))
+          ) : true
+        ).map((talent, index) => (
           <TalentCard
             key={talent.id}
             initial={{ opacity: 0, y: 20 }}
@@ -498,6 +565,23 @@ const TalentRecommendation = () => {
           </>
         )}
       </DetailModal>
+
+      {/* AI 챗봇 입력창 */}
+      <ChatInput>
+        <ChatTextarea
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          placeholder="원하는 인재상을 자연어로 설명해주세요..."
+          disabled={loading}
+        />
+        <Button
+          className="primary"
+          onClick={handleChatSubmit}
+          disabled={loading}
+        >
+          {loading ? '분석 중...' : 'AI 분석 요청'}
+        </Button>
+      </ChatInput>
     </TalentContainer>
   );
 };
