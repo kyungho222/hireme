@@ -442,6 +442,24 @@ const ImageBasedRegistration = ({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templates, setTemplates] = useState([]);
+  
+  // AI 자동 플로우 시작 이벤트 리스너
+  React.useEffect(() => {
+    const handleStartImageBasedAIFlow = () => {
+      console.log('AI 자동 플로우 시작됨 - 이미지 기반 등록');
+      // 이미지 기반 등록에서는 자동으로 이미지 생성 단계로 이동
+      setTimeout(() => {
+        setCurrentStep(6); // 이미지 생성 단계로 이동
+        handleGenerateImages(); // 자동으로 이미지 생성 시작
+      }, 1000);
+    };
+
+    window.addEventListener('startImageBasedAIFlow', handleStartImageBasedAIFlow);
+    
+    return () => {
+      window.removeEventListener('startImageBasedAIFlow', handleStartImageBasedAIFlow);
+    };
+  }, []);
   const [formData, setFormData] = useState({
     // Step 1: 구인 부서
     department: '',

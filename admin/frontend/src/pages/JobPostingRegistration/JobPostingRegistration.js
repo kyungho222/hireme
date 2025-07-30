@@ -360,12 +360,98 @@ const JobPostingRegistration = () => {
       setShowOrganizationModal(true);
     };
 
+    // 새로운 자동 플로우 핸들러들
+    const handleStartTextBasedFlow = () => {
+      setShowTextRegistration(true);
+      // TextBasedRegistration 컴포넌트에서 AI 챗봇 자동 시작을 위해 이벤트 발생
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('startTextBasedAIChatbot'));
+      }, 500);
+    };
+
+    const handleStartImageBasedFlow = () => {
+      setShowImageRegistration(true);
+      // ImageBasedRegistration 컴포넌트에서 AI 자동 시작을 위해 이벤트 발생
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('startImageBasedAIFlow'));
+      }, 500);
+    };
+
+    // AI 도우미 시작 핸들러 추가
+    const handleStartAIAssistant = () => {
+      console.log('=== AI 도우미 시작됨 ===');
+      console.log('현재 상태: showTextRegistration =', showTextRegistration);
+      
+      setShowTextRegistration(true);
+      console.log('텍스트 기반 등록 모달 열기 완료');
+      
+      // 2초 후 자동으로 AI 챗봇 시작
+      setTimeout(() => {
+        console.log('2초 타이머 완료 - startTextBasedAIChatbot 이벤트 발생');
+        window.dispatchEvent(new CustomEvent('startTextBasedAIChatbot'));
+      }, 2000);
+    };
+
+    // 채팅봇 수정 명령 핸들러들
+    const handleUpdateDepartment = (event) => {
+      const newDepartment = event.detail.value;
+      console.log('부서 업데이트:', newDepartment);
+      // 현재 열린 모달이나 폼에서 부서 정보 업데이트
+      if (showTextRegistration) {
+        window.dispatchEvent(new CustomEvent('updateTextFormDepartment', { 
+          detail: { value: newDepartment } 
+        }));
+      }
+    };
+
+    const handleUpdateHeadcount = (event) => {
+      const newHeadcount = event.detail.value;
+      console.log('인원 업데이트:', newHeadcount);
+      // 현재 열린 모달이나 폼에서 인원 정보 업데이트
+      if (showTextRegistration) {
+        window.dispatchEvent(new CustomEvent('updateTextFormHeadcount', { 
+          detail: { value: newHeadcount } 
+        }));
+      }
+    };
+
+    const handleUpdateSalary = (event) => {
+      const newSalary = event.detail.value;
+      console.log('급여 업데이트:', newSalary);
+      // 현재 열린 모달이나 폼에서 급여 정보 업데이트
+      if (showTextRegistration) {
+        window.dispatchEvent(new CustomEvent('updateTextFormSalary', { 
+          detail: { value: newSalary } 
+        }));
+      }
+    };
+
+    const handleUpdateWorkContent = (event) => {
+      const newWorkContent = event.detail.value;
+      console.log('업무 내용 업데이트:', newWorkContent);
+      // 현재 열린 모달이나 폼에서 업무 내용 업데이트
+      if (showTextRegistration) {
+        window.dispatchEvent(new CustomEvent('updateTextFormWorkContent', { 
+          detail: { value: newWorkContent } 
+        }));
+      }
+    };
+
     // 이벤트 리스너 등록
     window.addEventListener('openRegistrationMethod', handleRegistrationMethod);
     window.addEventListener('openTextRegistration', handleTextRegistration);
     window.addEventListener('openImageRegistration', handleImageRegistration);
     window.addEventListener('openTemplateModal', handleTemplateModal);
     window.addEventListener('openOrganizationModal', handleOrganizationModal);
+    window.addEventListener('startTextBasedFlow', handleStartTextBasedFlow);
+    window.addEventListener('startImageBasedFlow', handleStartImageBasedFlow);
+    window.addEventListener('startAIAssistant', handleStartAIAssistant);
+    
+    // 채팅봇 수정 명령 이벤트 리스너 등록
+    window.addEventListener('updateDepartment', handleUpdateDepartment);
+    window.addEventListener('updateHeadcount', handleUpdateHeadcount);
+    window.addEventListener('updateSalary', handleUpdateSalary);
+    window.addEventListener('updateWorkContent', handleUpdateWorkContent);
 
     // 클린업
     return () => {
@@ -374,6 +460,15 @@ const JobPostingRegistration = () => {
       window.removeEventListener('openImageRegistration', handleImageRegistration);
       window.removeEventListener('openTemplateModal', handleTemplateModal);
       window.removeEventListener('openOrganizationModal', handleOrganizationModal);
+      window.removeEventListener('startTextBasedFlow', handleStartTextBasedFlow);
+      window.removeEventListener('startImageBasedFlow', handleStartImageBasedFlow);
+      window.removeEventListener('startAIAssistant', handleStartAIAssistant);
+      
+      // 채팅봇 수정 명령 이벤트 리스너 제거
+      window.removeEventListener('updateDepartment', handleUpdateDepartment);
+      window.removeEventListener('updateHeadcount', handleUpdateHeadcount);
+      window.removeEventListener('updateSalary', handleUpdateSalary);
+      window.removeEventListener('updateWorkContent', handleUpdateWorkContent);
     };
   }, []);
 

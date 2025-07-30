@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import TemplateModal from './TemplateModal';
+import EnhancedModalChatbot from '../../components/EnhancedModalChatbot';
 import { 
   FiX, 
   FiArrowLeft, 
@@ -332,6 +333,8 @@ const AISuggestionText = styled.div`
   line-height: 1.5;
 `;
 
+// AI 채용공고 작성 도우미 관련 styled components는 메인 챗봇으로 이동됨
+
 const TextBasedRegistration = ({ 
   isOpen, 
   onClose, 
@@ -342,6 +345,116 @@ const TextBasedRegistration = ({
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [aiChatbot, setAiChatbot] = useState({
+    isActive: false,
+    currentQuestion: '',
+    step: 1
+  });
+  const [aiResponse, setAiResponse] = useState('');
+  
+  // 모달이 열릴 때 자동으로 AI 챗봇 시작
+  React.useEffect(() => {
+    if (isOpen) {
+      // 모달이 열린 후 약간의 지연을 두고 AI 챗봇 시작
+      const timer = setTimeout(() => {
+        setAiChatbot({
+          isActive: true,
+          currentQuestion: '구인 부서를 알려주세요! (예: 개발, 마케팅, 영업, 디자인 등)',
+          step: 1
+        });
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+    // 메인 챗봇에서 폼 데이터 업데이트 이벤트 리스너
+  React.useEffect(() => {
+    const handleExternalAIChatbotResponse = (event) => {
+      if (aiChatbot.isActive) {
+        const userResponse = event.detail.message;
+        handleAIChatbotResponse(userResponse);
+      }
+    };
+
+    // AI 자동 플로우 시작 이벤트 리스너
+    const handleStartTextBasedAIChatbot = () => {
+      console.log('=== AI 자동 플로우 시작됨 - 텍스트 기반 등록 ===');
+      console.log('현재 aiChatbot 상태:', aiChatbot);
+      console.log('현재 isOpen 상태:', isOpen);
+      
+      setAiChatbot({
+        isActive: true,
+        currentQuestion: '구인 부서를 알려주세요! (예: 개발, 마케팅, 영업, 디자인 등)',
+        step: 1
+      });
+      
+      console.log('AI 챗봇 상태 업데이트 완료');
+      console.log('AI 챗봇이 활성화되었습니다. 사용자에게 질문을 시작합니다.');
+    };
+
+    // 자동 진행 이벤트 리스너
+    const handleAutoProgress = () => {
+      console.log('자동 진행 이벤트 수신됨');
+      // 자동 진행은 AI 챗봇 내부에서 처리되므로 별도 처리 불필요
+    };
+
+    // 채팅봇 수정 명령 이벤트 리스너들
+    const handleUpdateDepartment = (event) => {
+      const newDepartment = event.detail.value;
+      console.log('TextBasedRegistration - 부서 업데이트:', newDepartment);
+      setFormData(prev => ({
+        ...prev,
+        department: newDepartment
+      }));
+    };
+
+    const handleUpdateHeadcount = (event) => {
+      const newHeadcount = event.detail.value;
+      console.log('TextBasedRegistration - 인원 업데이트:', newHeadcount);
+      setFormData(prev => ({
+        ...prev,
+        headcount: newHeadcount
+      }));
+    };
+
+    const handleUpdateSalary = (event) => {
+      const newSalary = event.detail.value;
+      console.log('TextBasedRegistration - 급여 업데이트:', newSalary);
+      setFormData(prev => ({
+        ...prev,
+        salary: newSalary
+      }));
+    };
+
+    const handleUpdateWorkContent = (event) => {
+      const newWorkContent = event.detail.value;
+      console.log('TextBasedRegistration - 업무 내용 업데이트:', newWorkContent);
+      setFormData(prev => ({
+        ...prev,
+        mainDuties: newWorkContent
+      }));
+    };
+
+    window.addEventListener('aiChatbotResponse', handleExternalAIChatbotResponse);
+    window.addEventListener('startTextBasedAIChatbot', handleStartTextBasedAIChatbot);
+    window.addEventListener('autoProgress', handleAutoProgress);
+    window.addEventListener('updateTextFormDepartment', handleUpdateDepartment);
+    window.addEventListener('updateTextFormHeadcount', handleUpdateHeadcount);
+    window.addEventListener('updateTextFormSalary', handleUpdateSalary);
+    window.addEventListener('updateTextFormWorkContent', handleUpdateWorkContent);
+    
+    return () => {
+      window.removeEventListener('aiChatbotResponse', handleExternalAIChatbotResponse);
+      window.removeEventListener('startTextBasedAIChatbot', handleStartTextBasedAIChatbot);
+      window.removeEventListener('autoProgress', handleAutoProgress);
+      window.removeEventListener('updateTextFormDepartment', handleUpdateDepartment);
+      window.removeEventListener('updateTextFormHeadcount', handleUpdateHeadcount);
+      window.removeEventListener('updateTextFormSalary', handleUpdateSalary);
+      window.removeEventListener('updateTextFormWorkContent', handleUpdateWorkContent);
+    };
+  }, [aiChatbot.isActive]);
+  
   const [formData, setFormData] = useState({
     // Step 1: 구인 부서
     department: '',
@@ -465,6 +578,95 @@ const TextBasedRegistration = ({
       await sendNotificationEmail(completeData);
     }
   };
+
+  // AI 챗봇 시작
+  // AI 채용공고 작성 도우미 시작 (메인 챗봇에서 호출됨)
+  const startAIChatbot = () => {
+    // 메인 챗봇에서 AI 모드가 시작되므로 여기서는 별도 처리 불필요
+    console.log('AI 채용공고 작성 도우미가 메인 챗봇에서 시작됨');
+  };
+
+  // AI 챗봇 응답 처리
+  const handleAIChatbotResponse = (userResponse) => {
+    const currentStep = aiChatbot.step;
+    
+    // 현재 단계에 따라 폼 데이터 업데이트
+    switch (currentStep) {
+      case 1: // 구인 부서
+        setFormData(prev => ({ ...prev, department: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '채용 인원은 몇 명인가요? (예: 1명, 2명, 3명)',
+          step: 2
+        }));
+        break;
+      case 2: // 채용 인원
+        setFormData(prev => ({ ...prev, headcount: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '어떤 업무를 담당하게 되나요? (예: 웹 개발, 디자인, 마케팅)',
+          step: 3
+        }));
+        break;
+      case 3: // 업무 내용
+        setFormData(prev => ({ ...prev, mainDuties: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '근무 시간은 어떻게 되나요? (예: 09:00-18:00, 유연근무제)',
+          step: 4
+        }));
+        break;
+      case 4: // 근무 시간
+        setFormData(prev => ({ ...prev, workHours: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '근무 위치는 어디인가요? (예: 서울, 부산, 대구)',
+          step: 5
+        }));
+        break;
+      case 5: // 근무 위치
+        setFormData(prev => ({ ...prev, locationCity: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '급여 조건은 어떻게 되나요? (예: 면접 후 협의, 3000만원)',
+          step: 6
+        }));
+        break;
+      case 6: // 급여 조건
+        setFormData(prev => ({ ...prev, salary: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '마감일은 언제인가요? (예: 2024년 12월 31일)',
+          step: 7
+        }));
+        break;
+      case 7: // 마감일
+        setFormData(prev => ({ ...prev, deadline: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          currentQuestion: '연락처 이메일을 알려주세요.',
+          step: 8
+        }));
+        break;
+      case 8: // 연락처 이메일
+        setFormData(prev => ({ ...prev, contactEmail: userResponse }));
+        setAiChatbot(prev => ({
+          ...prev,
+          isActive: false,
+          currentQuestion: '',
+          step: 1
+        }));
+        // AI 챗봇 완료 후 다음 단계로 이동
+        setTimeout(() => {
+          setCurrentStep(2);
+        }, 1000);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // FloatingChatbot에서 보낸 응답을 처리하는 이벤트 리스너
 
   const handleSaveTemplate = (template) => {
     setTemplates(prev => [...prev, template]);
@@ -976,13 +1178,22 @@ const TextBasedRegistration = ({
                   {currentStep === 1 ? '취소' : '이전'}
                 </Button>
                 {currentStep === 1 && (
-                  <Button 
-                    className="secondary" 
-                    onClick={() => setShowTemplateModal(true)}
-                  >
-                    <FiFolder size={16} />
-                    템플릿
-                  </Button>
+                  <>
+                    <Button 
+                      className="secondary" 
+                      onClick={() => setShowTemplateModal(true)}
+                    >
+                      <FiFolder size={16} />
+                      템플릿
+                    </Button>
+                    <Button 
+                      className="primary" 
+                      onClick={startAIChatbot}
+                      style={{ background: 'linear-gradient(135deg, #ff6b6b, #ee5a52)' }}
+                    >
+                      🤖 AI 도우미
+                    </Button>
+                  </>
                 )}
                 <Button 
                   className="primary" 
@@ -1009,6 +1220,52 @@ const TextBasedRegistration = ({
             </Content>
           </Modal>
         </Overlay>
+      )}
+
+      {/* AI 챗봇이 활성화될 때 EnhancedModalChatbot 표시 */}
+      {aiChatbot.isActive && (
+        <EnhancedModalChatbot
+          isOpen={aiChatbot.isActive}
+          onClose={() => setAiChatbot({ isActive: false, currentQuestion: '', step: 1 })}
+          title="AI 채용공고 작성 도우미"
+          onFieldUpdate={(field, value) => {
+            console.log('AI 챗봇에서 필드 업데이트:', field, value);
+            setFormData(prev => ({
+              ...prev,
+              [field]: value
+            }));
+          }}
+          onComplete={(data) => {
+            console.log('AI 챗봇 완료:', data);
+            setFormData(prev => ({ ...prev, ...data }));
+            setAiChatbot({ isActive: false, currentQuestion: '', step: 1 });
+          }}
+          fields={[
+            { key: 'department', label: '구인 부서', type: 'text' },
+            { key: 'headcount', label: '채용 인원', type: 'text' },
+            { key: 'mainDuties', label: '주요 업무', type: 'textarea' },
+            { key: 'workHours', label: '근무 시간', type: 'text' },
+            { key: 'locationCity', label: '근무 위치', type: 'text' },
+            { key: 'salary', label: '급여 조건', type: 'text' },
+            { key: 'deadline', label: '마감일', type: 'date' },
+            { key: 'contactEmail', label: '연락처 이메일', type: 'email' }
+          ]}
+          aiAssistant={true}
+        >
+          <div>
+            <h3>현재 입력된 정보</h3>
+            <div style={{ fontSize: '14px', color: '#666' }}>
+              <p><strong>구인 부서:</strong> {formData.department || '미입력'}</p>
+              <p><strong>채용 인원:</strong> {formData.headcount || '미입력'}</p>
+              <p><strong>주요 업무:</strong> {formData.mainDuties || '미입력'}</p>
+              <p><strong>근무 시간:</strong> {formData.workHours || '미입력'}</p>
+              <p><strong>근무 위치:</strong> {formData.locationCity || '미입력'}</p>
+              <p><strong>급여 조건:</strong> {formData.salary || '미입력'}</p>
+              <p><strong>마감일:</strong> {formData.deadline || '미입력'}</p>
+              <p><strong>연락처:</strong> {formData.contactEmail || '미입력'}</p>
+            </div>
+          </div>
+        </EnhancedModalChatbot>
       )}
 
       <TemplateModal
