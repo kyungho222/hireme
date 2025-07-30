@@ -16,6 +16,33 @@ function App() {
   const location = useLocation();
   const currentPage = location.pathname.replace('/', '') || 'dashboard';
 
+  const handlePageAction = (action) => {
+    console.log('페이지 액션 실행:', action);
+    
+    // job-posting 페이지 액션 처리
+    if (action === 'openRegistrationMethod') {
+      // RegistrationMethodModal 열기
+      const event = new CustomEvent('openRegistrationMethod');
+      window.dispatchEvent(event);
+    } else if (action === 'openTextRegistration') {
+      // TextBasedRegistration 열기
+      const event = new CustomEvent('openTextRegistration');
+      window.dispatchEvent(event);
+    } else if (action === 'openImageRegistration') {
+      // ImageBasedRegistration 열기
+      const event = new CustomEvent('openImageRegistration');
+      window.dispatchEvent(event);
+    } else if (action === 'openTemplateModal') {
+      // TemplateModal 열기
+      const event = new CustomEvent('openTemplateModal');
+      window.dispatchEvent(event);
+    } else if (action === 'openOrganizationModal') {
+      // OrganizationModal 열기
+      const event = new CustomEvent('openOrganizationModal');
+      window.dispatchEvent(event);
+    }
+  };
+
   return (
     <>
       <Layout>
@@ -41,6 +68,7 @@ function App() {
         onComplete={() => {
           console.log('챗봇 완료');
         }}
+        onPageAction={handlePageAction}
       />
     </>
   );

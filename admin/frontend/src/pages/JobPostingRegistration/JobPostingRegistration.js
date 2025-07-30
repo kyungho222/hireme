@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { 
@@ -337,6 +337,45 @@ const JobPostingRegistration = () => {
     benefits: '',
     deadline: ''
   });
+
+  // 챗봇 액션 이벤트 리스너
+  useEffect(() => {
+    const handleRegistrationMethod = () => {
+      setShowMethodModal(true);
+    };
+
+    const handleTextRegistration = () => {
+      setShowTextRegistration(true);
+    };
+
+    const handleImageRegistration = () => {
+      setShowImageRegistration(true);
+    };
+
+    const handleTemplateModal = () => {
+      setShowTemplateModal(true);
+    };
+
+    const handleOrganizationModal = () => {
+      setShowOrganizationModal(true);
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener('openRegistrationMethod', handleRegistrationMethod);
+    window.addEventListener('openTextRegistration', handleTextRegistration);
+    window.addEventListener('openImageRegistration', handleImageRegistration);
+    window.addEventListener('openTemplateModal', handleTemplateModal);
+    window.addEventListener('openOrganizationModal', handleOrganizationModal);
+
+    // 클린업
+    return () => {
+      window.removeEventListener('openRegistrationMethod', handleRegistrationMethod);
+      window.removeEventListener('openTextRegistration', handleTextRegistration);
+      window.removeEventListener('openImageRegistration', handleImageRegistration);
+      window.removeEventListener('openTemplateModal', handleTemplateModal);
+      window.removeEventListener('openOrganizationModal', handleOrganizationModal);
+    };
+  }, []);
 
   const [jobPostings, setJobPostings] = useState([
     {

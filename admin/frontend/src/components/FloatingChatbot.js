@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
+const FloatingChatbot = ({ page, onFieldUpdate, onComplete, onPageAction }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [uiElements, setUiElements] = useState([]);
   const inputRef = useRef(null);
   const messagesEndRef = useRef(null);
 
@@ -23,6 +24,11 @@ const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
       setMessages([welcomeMessage]);
     }
     setIsOpen(true);
+    
+    // 챗봇이 열린 후 입력창에 포커스
+    setTimeout(() => {
+      focusInput();
+    }, 300);
   };
 
   const getWelcomeMessage = (currentPage) => {
@@ -107,9 +113,147 @@ const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
     scrollToBottom();
   }, [messages]);
 
+  // 페이지가 변경될 때마다 UI 요소 스캔
+  useEffect(() => {
+    console.log('페이지 변경됨:', page);
+    const scannedElements = scanUIElements();
+    setUiElements(scannedElements);
+    console.log('스캔된 UI 요소들:', scannedElements);
+  }, [page]);
+
   // 입력창 포커스 함수
   const focusInput = () => {
     inputRef.current?.focus();
+  };
+
+  // UI 구조를 읽어서 동적 키워드 생성
+  const scanUIElements = () => {
+    const uiElements = [];
+    
+    // 버튼 요소들 스캔
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+      const text = button.textContent?.trim();
+      if (text) {
+        uiElements.push({
+          type: 'button',
+          text: text,
+          element: button,
+          keywords: generateKeywords(text)
+        });
+      }
+    });
+    
+    // 링크 요소들 스캔
+    const links = document.querySelectorAll('a');
+    links.forEach(link => {
+      const text = link.textContent?.trim();
+      if (text) {
+        uiElements.push({
+          type: 'link',
+          text: text,
+          element: link,
+          keywords: generateKeywords(text)
+        });
+      }
+    });
+    
+    // 특정 클래스를 가진 요소들 스캔
+    const clickableElements = document.querySelectorAll('[onclick], [data-action]');
+    clickableElements.forEach(element => {
+      const text = element.textContent?.trim();
+      if (text) {
+        uiElements.push({
+          type: 'clickable',
+          text: text,
+          element: element,
+          keywords: generateKeywords(text)
+        });
+      }
+    });
+    
+    return uiElements;
+  };
+
+  // 텍스트에서 키워드 생성
+  const generateKeywords = (text) => {
+    const keywords = [];
+    const lowerText = text.toLowerCase();
+    
+    // 원본 텍스트
+    keywords.push(lowerText);
+    
+    // 단어별 분리
+    const words = lowerText.split(/[\s,]+/).filter(word => word.length > 1);
+    keywords.push(...words);
+    
+    // 유사 표현들 추가
+    const synonyms = {
+      '새로운': ['새', '신규', '새로'],
+      '채용공고': ['공고', '채용', '구인'],
+      '등록': ['작성', '만들기', '생성', '추가'],
+      '텍스트': ['직접', '입력', '작성'],
+      '이미지': ['그림', '사진', 'AI'],
+      '템플릿': ['양식', '서식', '폼'],
+      '조직도': ['부서', '조직', '구조'],
+      '관리': ['설정', '편집', '수정']
+    };
+    
+    // 유사어 추가
+    words.forEach(word => {
+      if (synonyms[word]) {
+        keywords.push(...synonyms[word]);
+      }
+    });
+    
+    return [...new Set(keywords)]; // 중복 제거
+  };
+
+  // 페이지별 액션 처리 함수 (UI 구조 기반)
+  const handlePageAction = (message) => {
+    const lowerMessage = message.toLowerCase();
+    
+    if (page === 'job-posting') {
+      // 미리 스캔된 UI 요소들 사용
+      console.log('현재 저장된 UI 요소들:', uiElements);
+      
+      // 메시지와 UI 요소 매칭
+      for (const element of uiElements) {
+        for (const keyword of element.keywords) {
+          if (lowerMessage.includes(keyword)) {
+            // 매칭된 요소 클릭 시뮬레이션
+            if (element.element && element.element.click) {
+              element.element.click();
+              return {
+                message: `"${element.text}" 기능을 실행했습니다! ✅`
+              };
+            }
+          }
+        }
+      }
+      
+      // 특별한 액션들 (모달 등)
+      if (lowerMessage.includes('새로운') || lowerMessage.includes('새 ') || lowerMessage.includes('신규')) {
+        if (lowerMessage.includes('채용') || lowerMessage.includes('공고')) {
+          if (onPageAction) {
+            onPageAction('openRegistrationMethod');
+          }
+          return {
+            message: '새로운 채용공고 등록을 시작하겠습니다! 📝\n\n등록 방법을 선택해주세요:\n• 텍스트 기반 등록\n• 이미지 기반 등록'
+          };
+        }
+      }
+      
+              if (lowerMessage.includes('도움') || lowerMessage.includes('help')) {
+          const availableFeatures = uiElements.map(el => `• "${el.text}"`).join('\n');
+          
+          return {
+            message: `현재 페이지에서 사용 가능한 기능들입니다! 🎯\n\n${availableFeatures}\n\n이 중에서 원하는 기능을 말씀해주세요!`
+          };
+        }
+    }
+    
+    return null; // 액션이 없으면 null 반환
   };
 
   const toggleChat = () => {
@@ -134,6 +278,22 @@ const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsLoading(true);
+
+    // 페이지별 액션 처리
+    const pageAction = handlePageAction(inputValue);
+    if (pageAction) {
+      const actionMessage = {
+        type: 'bot',
+        content: pageAction.message,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, actionMessage]);
+      setIsLoading(false);
+      setTimeout(() => {
+        focusInput();
+      }, 100);
+      return;
+    }
 
     // 백엔드 API 호출 (기존 백엔드 사용)
     try {
@@ -334,6 +494,9 @@ const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
                     </div>
                   </div>
                 )}
+                
+                {/* 자동 스크롤을 위한 빈 div */}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* 입력 영역 */}
@@ -344,6 +507,7 @@ const FloatingChatbot = ({ page, onFieldUpdate, onComplete }) => {
               }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <textarea
+                    ref={inputRef}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={handleKeyPress}
