@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os
 from datetime import datetime
+from chatbot_router import router as chatbot_router
 
 # FastAPI 앱 생성
 app = FastAPI(
@@ -21,6 +22,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 챗봇 라우터 추가
+app.include_router(chatbot_router, prefix="/api/chatbot", tags=["chatbot"])
 
 # MongoDB 연결
 MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://admin:password@mongodb-client:27017/hireme-client?authSource=admin")

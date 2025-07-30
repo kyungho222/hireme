@@ -6,6 +6,7 @@ import {
   faClock, 
   faMoneyBillWave 
 } from '@fortawesome/free-solid-svg-icons';
+import FloatingChatbot from '../components/FloatingChatbot';
 import './Jobs.css';
 
 const Jobs: React.FC = () => {
@@ -134,6 +135,17 @@ const Jobs: React.FC = () => {
           더 많은 공고 보기
         </button>
       </div>
+
+      {/* 플로팅 챗봇 */}
+      <FloatingChatbot
+        page="jobs"
+        onFieldUpdate={(field, value) => {
+          console.log('챗봇 입력:', field, value);
+        }}
+        onComplete={() => {
+          console.log('챗봇 대화 완료');
+        }}
+      />
     </div>
   );
 };
