@@ -1,0 +1,124 @@
+services:
+  # ===== ADMIN CONTEXT =====
+  
+  # MongoDB 데이터베이스 (관리자용)
+  mongodb-admin:
+    image: mongo:6.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=hireme-admin
+    volumes:
+      - mongodb_admin_data:/data/db
+      - ./admin/database/init:/docker-entrypoint-initdb.d
+    networks:
+      - hireme-network
+    restart: unless-stopped
+
+  # Python 백엔드 API (관리자용)
+  backend-admin:
+    build: 
+      context: ./admin/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./admin/backend:/app
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb-admin:27017/hireme-admin?authSource=admin
+      - PYTHONPATH=/app
+      - DEBUG=1
+    depends_on:
+      - mongodb-admin
+    networks:
+      - hireme-network
+    restart: unless-stopped
+
+  # 관리자 대시보드 (React)
+  frontend-admin:
+    build: 
+      context: ./admin/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./admin/frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:8000
+    networks:
+      - hireme-network
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend-admin
+
+  # ===== CLIENT CONTEXT =====
+  
+  # MongoDB 데이터베이스 (클라이언트용)
+  mongodb-client:
+    image: mongo:6.0
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=hireme-client
+    volumes:
+      - mongodb_client_data:/data/db
+      - ./client/database/init:/docker-entrypoint-initdb.d
+    networks:
+      - hireme-network
+    restart: unless-stopped
+
+  # Python 백엔드 API (클라이언트용)
+  backend-client:
+    build: 
+      context: ./client/backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./client/backend:/app
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb-client:27017/hireme-client?authSource=admin
+      - PYTHONPATH=/app
+      - DEBUG=1
+    depends_on:
+      - mongodb-client
+    networks:
+      - hireme-network
+    restart: unless-stopped
+
+  # 클라이언트 애플리케이션 (React + TypeScript)
+  frontend-client:
+    build: 
+      context: ./client/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:8001
+    networks:
+      - hireme-network
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend-client
+
+volumes:
+  mongodb_admin_data:
+  mongodb_client_data:
+
+networks:
+  hireme-network:
+    driver: bridge 

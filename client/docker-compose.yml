@@ -1,0 +1,63 @@
+services:
+  # MongoDB 데이터베이스 (클라이언트용)
+  mongodb-client:
+    image: mongo:6.0
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+      - MONGO_INITDB_DATABASE=hireme-client
+    volumes:
+      - mongodb_client_data:/data/db
+      - ./database/init:/docker-entrypoint-initdb.d
+    networks:
+      - client-network
+    restart: unless-stopped
+
+  # Python 백엔드 API (클라이언트용)
+  backend-client:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./backend:/app
+    environment:
+      - MONGODB_URI=mongodb://admin:password@mongodb-client:27017/hireme-client?authSource=admin
+      - PYTHONPATH=/app
+      - DEBUG=1
+    depends_on:
+      - mongodb-client
+    networks:
+      - client-network
+    restart: unless-stopped
+
+  # 클라이언트 애플리케이션 (React + TypeScript)
+  frontend-client:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - REACT_APP_API_URL=http://localhost:8001
+    networks:
+      - client-network
+    stdin_open: true
+    tty: true
+    depends_on:
+      - backend-client
+
+volumes:
+  mongodb_client_data:
+
+networks:
+  client-network:
+    driver: bridge 

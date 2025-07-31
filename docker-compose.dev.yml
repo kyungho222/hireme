@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  admin:
+    build: 
+      context: ./admin
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./admin:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+      - REACT_APP_ENV=development
+    networks:
+      - hireme-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - NODE_ENV=development
+      - REACT_APP_ENV=development
+    networks:
+      - hireme-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+
+networks:
+  hireme-network:
+    driver: bridge 
