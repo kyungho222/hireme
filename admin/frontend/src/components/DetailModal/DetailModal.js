@@ -217,9 +217,6 @@ const DetailModal = ({
                 삭제
               </ActionButton>
             )}
-            <ActionButton className="secondary" onClick={onClose}>
-              닫기
-            </ActionButton>
           </ActionButtons>
         )}
       </ModalContent>
