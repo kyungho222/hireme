@@ -36,7 +36,7 @@ const Header = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 32px;
+  font-size: 48px;
   font-weight: 700;
   color: var(--text-primary);
 `;
@@ -47,16 +47,16 @@ const ActionButtons = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 12px 24px;
+  padding: 20px 40px;
   border: none;
   border-radius: var(--border-radius);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
+  gap: 12px;
+  font-size: 22px;
   
   &.primary {
     background: var(--primary-color);
@@ -66,11 +66,11 @@ const Button = styled.button`
   &.secondary {
     background: white;
     color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    border: 2px solid var(--border-color);
   }
   
   &:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-light);
   }
 `;
@@ -84,10 +84,10 @@ const SearchBar = styled.div`
 
 const SearchInput = styled.input`
   flex: 1;
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
+  padding: 20px 28px;
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
-  font-size: 14px;
+  font-size: 20px;
   
   &:focus {
     outline: none;
@@ -96,15 +96,16 @@ const SearchInput = styled.input`
 `;
 
 const FilterButton = styled.button`
-  padding: 12px 16px;
-  border: 1px solid var(--border-color);
+  padding: 20px 28px;
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   background: white;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   transition: var(--transition);
+  font-size: 20px;
   
   &:hover {
     border-color: var(--primary-color);
@@ -120,13 +121,13 @@ const ResumeGrid = styled.div`
 const ResumeCard = styled(motion.div)`
   background: white;
   border-radius: var(--border-radius);
-  padding: 24px;
+  padding: 40px;
   box-shadow: var(--shadow-light);
   transition: var(--transition);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   
   &:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
     box-shadow: var(--shadow-medium);
   }
 `;
@@ -135,7 +136,7 @@ const ResumeHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const ApplicantInfo = styled.div`
@@ -143,50 +144,50 @@ const ApplicantInfo = styled.div`
 `;
 
 const ApplicantName = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 32px;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 4px;
+  margin-bottom: 10px;
 `;
 
 const ApplicantPosition = styled.div`
-  font-size: 14px;
+  font-size: 22px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 `;
 
 // StatusBadge is imported from DetailModal
 
 const ResumeContent = styled.div`
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 `;
 
 const ResumeDetail = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 16px;
+  font-size: 20px;
 `;
 
 // DetailLabel and DetailValue are imported from DetailModal
 
 const ResumeActions = styled.div`
   display: flex;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 16px;
+  margin-top: 28px;
 `;
 
 const ActionButton = styled.button`
-  padding: 8px 12px;
-  border: 1px solid var(--border-color);
+  padding: 16px 28px;
+  border: 2px solid var(--border-color);
   border-radius: var(--border-radius);
   background: white;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 18px;
   transition: var(--transition);
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 10px;
   
   &:hover {
     background: var(--background-secondary);
@@ -195,46 +196,86 @@ const ActionButton = styled.button`
 `;
 
 const AnalysisResult = styled.div`
-  margin-top: 16px;
-  padding: 12px;
+  margin-top: 28px;
+  padding: 24px;
   background: var(--background-secondary);
   border-radius: var(--border-radius);
-  border-left: 4px solid var(--primary-color);
+  border-left: 6px solid var(--primary-color);
 `;
 
 const AnalysisTitle = styled.div`
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: 18px;
+  font-size: 22px;
 `;
 
 const AnalysisScore = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 16px;
+  margin-bottom: 16px;
 `;
 
 const ScoreBar = styled.div`
   flex: 1;
-  height: 8px;
+  height: 18px;
   background: var(--border-color);
-  border-radius: 4px;
+  border-radius: 9px;
   overflow: hidden;
 `;
 
 const ScoreFill = styled.div`
   height: 100%;
-  background: var(--primary-color);
+  background: ${props => {
+    if (props.score >= 90) return '#22c55e'; // 초록
+    if (props.score >= 80) return '#f59e0b'; // 노랑
+    return '#ef4444'; // 빨강
+  }};
   width: ${props => props.score}%;
   transition: width 0.3s ease;
 `;
 
 const ScoreText = styled.span`
-  font-size: 12px;
+  font-size: 20px;
   color: var(--text-secondary);
-  min-width: 30px;
+  min-width: 50px;
+`;
+
+// 커스텀 StatusBadge 컴포넌트 추가
+const CustomStatusBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  border-radius: 28px;
+  font-size: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &.approved {
+    background-color: #dcfce7;
+    color: #166534;
+    border: 2px solid #22c55e;
+  }
+
+  &.pending {
+    background-color: #fef3c7;
+    color: #92400e;
+    border: 2px solid #f59e0b;
+  }
+
+  &.rejected {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 2px solid #ef4444;
+  }
+
+  &.reviewed {
+    background-color: #dbeafe;
+    color: #1e40af;
+    border: 2px solid #3b82f6;
+  }
 `;
 
 // 샘플 데이터
@@ -308,12 +349,73 @@ const ResumeManagement = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedResume, setSelectedResume] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
+  // 필터 상태 추가
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedJobs, setSelectedJobs] = useState([]);
+  const [selectedExperience, setSelectedExperience] = useState([]);
+  const [selectedScoreRanges, setSelectedScoreRanges] = useState([]);
+
+  const handleFilterApply = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleFilterClose = () => {
+    setIsFilterOpen(false);
+  };
+
+  const handleJobToggle = (job) => {
+    setSelectedJobs(prev => 
+      prev.includes(job) 
+        ? prev.filter(j => j !== job)
+        : [...prev, job]
+    );
+  };
+
+  const handleExperienceToggle = (exp) => {
+    setSelectedExperience(prev => 
+      prev.includes(exp) 
+        ? prev.filter(e => e !== exp)
+        : [...prev, exp]
+    );
+  };
+
+  const handleScoreRangeToggle = (range) => {
+    setSelectedScoreRanges(prev => 
+      prev.includes(range) 
+        ? prev.filter(r => r !== range)
+        : [...prev, range]
+    );
+  };
 
   const filteredResumes = resumes.filter(resume => {
-    const matchesSearch = resume.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = resume.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          resume.position.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || resume.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    
+    // 직무 필터링
+    const matchesJob = selectedJobs.length === 0 || selectedJobs.some(job => 
+      resume.position.toLowerCase().includes(job.toLowerCase())
+    );
+    
+    // 경력 필터링
+    const resumeExp = parseInt(resume.experience);
+    const matchesExperience = selectedExperience.length === 0 || selectedExperience.some(exp => {
+      if (exp === '1-3년') return resumeExp >= 1 && resumeExp <= 3;
+      if (exp === '3-5년') return resumeExp >= 3 && resumeExp <= 5;
+      if (exp === '5년이상') return resumeExp >= 5;
+      return false;
+    });
+    
+    // 적합도 필터링
+    const matchesScore = selectedScoreRanges.length === 0 || selectedScoreRanges.some(range => {
+      if (range === '90-100') return resume.analysisScore >= 90;
+      if (range === '80-89') return resume.analysisScore >= 80 && resume.analysisScore <= 89;
+      if (range === '70-79') return resume.analysisScore >= 70 && resume.analysisScore <= 79;
+      return false;
+    });
+    
+    return matchesSearch && matchesFilter && matchesJob && matchesExperience && matchesScore;
   });
 
   return (
@@ -321,10 +423,6 @@ const ResumeManagement = () => {
       <Header>
         <Title>이력서 관리</Title>
         <ActionButtons>
-          <Button className="secondary">
-            <FiSmartphone />
-            QR 스캔
-          </Button>
           <Button className="primary">
             <FiPlus />
             새 이력서 등록
@@ -339,11 +437,116 @@ const ResumeManagement = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <FilterButton>
+        <FilterButton onClick={() => setIsFilterOpen(true)}>
           <FiFilter />
           필터
         </FilterButton>
       </SearchBar>
+
+      {/* 필터 모달 */}
+      {isFilterOpen && (
+        <>
+          {/* 오버레이 */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            width: '100vw',
+            height: '100vh',
+            background: 'rgba(0,0,0,0.3)',
+            zIndex: 999
+          }} />
+          {/* 가로형 필터 모달 */}
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 1000,
+            background: 'white',
+            border: '2px solid #e5e7eb',
+            borderRadius: '16px',
+            padding: '32px 48px',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            minWidth: '900px',
+            maxWidth: '1100px',
+            minHeight: '220px',
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '48px',
+            alignItems: 'flex-start',
+            justifyContent: 'center' // x축 중앙 정렬
+          }}>
+            {/* 직무 필터 */}
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#374151' }}>
+                직무
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px' }}>
+                {['프론트엔드', '백엔드', '풀스택', '데이터 분석', 'PM', 'UI/UX', 'DevOps', 'QA'].map(job => (
+                  <label key={job} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedJobs.includes(job)}
+                      onChange={() => handleJobToggle(job)}
+                      style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', maxWidth: '20px', maxHeight: '20px' }}
+                    />
+                    {job}
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* 경력 필터 */}
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#374151' }}>
+                경력
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {['1-3년', '3-5년', '5년이상'].map(exp => (
+                  <label key={exp} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedExperience.includes(exp)}
+                      onChange={() => handleExperienceToggle(exp)}
+                      style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', maxWidth: '20px', maxHeight: '20px' }}
+                    />
+                    {exp}
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* 적합도 필터 */}
+            <div style={{ flex: 1 }}>
+              <h4 style={{ fontSize: '20px', fontWeight: '700', marginBottom: '16px', color: '#374151' }}>
+                적합도
+              </h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {['90-100', '80-89', '70-79'].map(range => (
+                  <label key={range} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedScoreRanges.includes(range)}
+                      onChange={() => handleScoreRangeToggle(range)}
+                      style={{ width: '20px', height: '20px', minWidth: '20px', minHeight: '20px', maxWidth: '20px', maxHeight: '20px' }}
+                    />
+                    {range}점
+                  </label>
+                ))}
+              </div>
+            </div>
+            {/* 적용 버튼 */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'flex-end', minWidth: '120px', height: '100%' }}>
+              <Button 
+                className="primary" 
+                onClick={handleFilterApply}
+                style={{ fontSize: '18px', padding: '16px 32px', marginTop: 'auto' }}
+              >
+                적용
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
 
       <ResumeGrid>
         {filteredResumes.map((resume, index) => (
@@ -358,9 +561,9 @@ const ResumeManagement = () => {
                 <ApplicantName>{resume.name}</ApplicantName>
                 <ApplicantPosition>{resume.position}</ApplicantPosition>
               </ApplicantInfo>
-              <StatusBadge className={resume.status}>
+              <CustomStatusBadge className={resume.status}>
                 {getStatusText(resume.status)}
-              </StatusBadge>
+              </CustomStatusBadge>
             </ResumeHeader>
 
             <ResumeContent>
@@ -395,7 +598,7 @@ const ResumeManagement = () => {
                 </ScoreBar>
                 <ScoreText>{resume.analysisScore}%</ScoreText>
               </AnalysisScore>
-              <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <div style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>
                 {resume.analysisResult}
               </div>
             </AnalysisResult>
@@ -412,10 +615,6 @@ const ResumeManagement = () => {
                 <FiDownload />
                 PDF 다운로드
               </ActionButton>
-              <ActionButton>
-                <FiSmartphone />
-                QR 생성
-              </ActionButton>
             </ResumeActions>
           </ResumeCard>
         ))}
@@ -429,14 +628,6 @@ const ResumeManagement = () => {
           setSelectedResume(null);
         }}
         title={selectedResume ? `${selectedResume.name} 이력서 상세` : ''}
-        onEdit={() => {
-          // 수정 기능 구현
-          console.log('이력서 수정:', selectedResume);
-        }}
-        onDelete={() => {
-          // 삭제 기능 구현
-          console.log('이력서 삭제:', selectedResume);
-        }}
       >
         {selectedResume && (
           <>
@@ -473,9 +664,21 @@ const ResumeManagement = () => {
                 </DetailItem>
                 <DetailItem>
                   <DetailLabel>상태</DetailLabel>
-                  <StatusBadge className={selectedResume.status}>
+                  <CustomStatusBadge className={selectedResume.status} style={{ 
+                    padding: '8px 16px', 
+                    fontSize: '14px', 
+                    borderRadius: '16px',
+                    display: 'inline-block',
+                    width: '80px',
+                    height: '32px',
+                    textAlign: 'center',
+                    lineHeight: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
                     {getStatusText(selectedResume.status)}
-                  </StatusBadge>
+                  </CustomStatusBadge>
                 </DetailItem>
               </DetailGrid>
             </DetailSection>
