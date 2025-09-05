@@ -1,0 +1,40 @@
+# 핵심 웹 프레임워크
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+
+# 데이터베이스
+motor>=3.3.2
+pymongo>=4.6.0
+
+# 설정 관리
+pydantic>=2.11.7
+pydantic-settings>=2.10.1
+python-dotenv>=1.0.0
+
+# HTTP 클라이언트
+httpx>=0.27.0
+requests>=2.31.0
+
+# AI/ML (필수만)
+openai>=1.58.1
+sentence-transformers>=2.2.0
+transformers>=4.36.2
+torch>=2.1.2
+
+# PDF 처리 (필수만)
+PyMuPDF>=1.24.14
+pytesseract>=0.3.10
+Pillow>=10.1.0
+
+# 벡터 데이터베이스
+chromadb>=0.4.0
+
+# 유틸리티
+python-dateutil>=2.9.0
+numpy>=1.26.4
+pandas>=2.2.3
+
+# 개발용 (선택적)
+pytest>=7.4.3
+pytest-asyncio>=0.21.1

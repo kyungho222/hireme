@@ -1,3 +1,4 @@
+@ -1,100 +1,2 @@
 # Dependencies
 node_modules/
 */node_modules/
@@ -94,4 +95,44 @@ jspm_packages/
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+*.yml
+*.yaml
+
+# 모든 node_modules 폴더 무시
+node_modules/
+
+# 파이썬 캐시파일
+__pycache__/
+
+#가상환경폴더
+workspace/
+/admin/backend/__pycache__
+/admin/backend/__pycache__
+admin/backend/__pycache__/chatbot_router.cpython-313.pyc
+admin/backend/__pycache__/database.cpython-313.pyc
+admin/backend/__pycache__/models.cpython-313.pyc
+admin/backend/__pycache__/models.cpython-313.pyc
+admin/backend/__pycache__/database.cpython-313.pyc
+admin/backend/__pycache__/chatbot_router.cpython-313.pyc
+/work
+
+# Data directories
+data/
+*/data/
+
+# 테스트 파일들 (정리됨)
+test_*.py
+*test*.py
+quick_*_test.py
+simple_test_*.py
+direct_db_test.py
+
+# 테스트 백업 디렉토리
+test-files-backup/
+
+# 테스트 결과
+test-results/
+coverage/
+backend/.env
